@@ -13,6 +13,7 @@ import InsightsScreen from '../screens/InsightsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import WellnessScreen from '../screens/WellnessScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import NewEntryScreen from '../screens/NewEntryScreen';
 import GlobalBackground from '../components/GlobalBackground';
 
 const Tab = createBottomTabNavigator();
@@ -83,6 +84,7 @@ export default function AppNavigator() {
           <Stack.Screen name="Tabs" component={TabNavigator} />
           <Stack.Screen name="Wellness" component={WellnessScreen} options={{ presentation: 'modal' }} />
           <Stack.Screen name="Settings" component={SettingsScreen} options={{ presentation: 'modal' }} />
+          <Stack.Screen name="NewEntry" component={NewEntryScreen} options={{ presentation: 'modal' }} />
         </Stack.Navigator>
       </NavigationContainer>
     </GlobalBackground>

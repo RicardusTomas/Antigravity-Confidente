@@ -1,38 +1,52 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '../theme/colors';
 import { useStore } from '../store/useStore';
-import { generateId, MOODS } from '../utils/moodHelpers';
 import JournalCard from '../components/JournalCard';
-import MoodSelector from '../components/MoodSelector';
 import EmptyState from '../components/EmptyState';
-import { Mood, EmotionEntry } from '../types';
 
-export default function JournalScreen({ route }: any) {
-  const navigation = useNavigation();
-  const { entries, addEntry, deleteEntry } = useStore();
+export default function JournalScreen() {
+  const { entries, deleteEntry } = useStore();
   const colors = useThemeColors();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedMood, setSelectedMood] = useState<Mood | undefined>();
-  const [note, setNote] = useState('');
-  const [tagInput, setTagInput] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (route?.params?.openModal) {
-      setModalVisible(true);
-    }
-  }, [route?.params]);
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: 'transparent' }]} edges={['top']}>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: colors.text }]}>Diário Emocional</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Registre como você se sente</Text>
+      </View>
 
-  useEffect(() => {
-    const unsubscribe = navigation?.addListener('focus', () => {
-      if (route?.params?.openModal) {
-        setModalVisible(true);
-      }
-    });
+      {entries.length === 0 ? (
+        <EmptyState
+          icon="book-outline"
+          title="Seu diário está vazio"
+          description="Comece registrando como você está se sentindo. Cada registro ajuda a entender melhor suas emoções."
+          actionLabel="Criar registro"
+          onAction={() => {}}
+        />
+      ) : (
+        <FlatList
+          data={entries}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <JournalCard entry={item} onDelete={() => deleteEntry(item.id)} />
+          )}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingTop: 8, paddingBottom: 100 }}
+        />
+      )}
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1 },
+  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+  title: { fontSize: 28, fontWeight: '800', letterSpacing: -0.5 },
+  subtitle: { fontSize: 14, marginTop: 4 },
+});
     return unsubscribe;
   }, [navigation, route?.params]);
 

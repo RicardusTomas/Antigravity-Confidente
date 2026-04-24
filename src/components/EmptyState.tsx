@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../theme/colors';
 
 interface EmptyStateProps {
@@ -12,7 +13,17 @@ interface EmptyStateProps {
 }
 
 export default function EmptyState({ icon, title, description, actionLabel, onAction }: EmptyStateProps) {
+  const navigation = useNavigation();
   const colors = useThemeColors();
+
+  const handlePress = () => {
+    if (onAction) {
+      onAction();
+    } else {
+      navigation.navigate('NewEntry' as any);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={[styles.iconCircle, { backgroundColor: colors.primaryBg }]}>
@@ -20,8 +31,8 @@ export default function EmptyState({ icon, title, description, actionLabel, onAc
       </View>
       <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
       <Text style={[styles.description, { color: colors.textSecondary }]}>{description}</Text>
-      {actionLabel && onAction && (
-        <TouchableOpacity style={[styles.button, { backgroundColor: colors.primary }]} onPress={onAction} activeOpacity={0.85}>
+      {actionLabel && (
+        <TouchableOpacity style={[styles.button, { backgroundColor: colors.primary }]} onPress={handlePress} activeOpacity={0.85}>
           <Text style={styles.buttonText}>{actionLabel}</Text>
           <Ionicons name="arrow-forward" size={16} color="#FFF" style={{ marginLeft: 6 }} />
         </TouchableOpacity>

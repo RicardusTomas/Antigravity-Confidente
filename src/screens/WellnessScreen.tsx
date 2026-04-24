@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Easing,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../theme/colors';
 import { useStore } from '../store/useStore';
 import { generateId } from '../utils/moodHelpers';
@@ -33,6 +34,7 @@ const GROUNDING_STEPS = [
 ];
 
 export default function WellnessScreen({ route }: any) {
+  const navigation = useNavigation();
   const { addBreathingSession } = useStore();
   const colors = useThemeColors();
   const [activeExercise, setActiveExercise] = useState<Exercise | null>(null);
@@ -93,8 +95,13 @@ export default function WellnessScreen({ route }: any) {
     <SafeAreaView style={[styles.safe, { backgroundColor: 'transparent' }]} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>Bem-estar</Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Cuide de si agora</Text>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
+            <Ionicons name="close" size={24} color={colors.text} />
+          </TouchableOpacity>
+          <View style={styles.headerText}>
+            <Text style={[styles.title, { color: colors.text }]}>Bem-estar</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Cuide de si agora</Text>
+          </View>
         </View>
 
         {/* Crisis Mode Button */}
@@ -221,6 +228,8 @@ export default function WellnessScreen({ route }: any) {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
+  closeBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  headerText: { flex: 1 },
   title: { fontSize: 24, fontWeight: '700' },
   subtitle: { fontSize: 14, marginTop: 2 },
   sectionTitle: { fontSize: 16, fontWeight: '700', paddingHorizontal: 20, marginTop: 24, marginBottom: 12 },
