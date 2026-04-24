@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { generateAIResponse as generateRuleBasedResponse, getWelcomeMessage } from './chatResponses';
 
 const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY || '';
@@ -74,33 +75,6 @@ export async function generateOpenAIResponse(
     console.error('OpenAI error:', error);
     const fallback = generateRuleBasedResponse(userMessage);
     return { text: fallback.text, isAI: false };
-  }
-}
-
-export async function generateSpeechAudio(text: string): Promise<string | null> {
-  if (!OPENAI_API_KEY) return null;
-
-  try {
-    const response = await fetch('https://api.openai.com/v1/audio/speech', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'tts-1',
-        voice: 'alloy',
-        input: text,
-        speed: 1.0
-      })
-    });
-
-    if (!response.ok) return null;
-
-    const blob = await response.blob();
-    return URL.createObjectURL(blob);
-  } catch {
-    return null;
   }
 }
 
