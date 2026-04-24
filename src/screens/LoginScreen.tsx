@@ -17,6 +17,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ username?: string; password?: string; confirm?: string }>({});
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -115,7 +116,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.inputWrapper}>
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, focusedInput === 'username' && styles.inputContainerFocused]}>
               <Ionicons name="person-outline" size={20} color="#7C6F9B" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
@@ -126,14 +127,15 @@ export default function LoginScreen() {
                 autoCapitalize="words"
                 autoCorrect={false}
                 selectionColor="#7C6F9B"
-                underlineColorAndroid="transparent"
+                onFocus={() => setFocusedInput('username')}
+                onBlur={() => setFocusedInput(null)}
               />
             </View>
             {errors.username && (
               <Text style={styles.errorText}>{errors.username}</Text>
             )}
 
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, focusedInput === 'password' && styles.inputContainerFocused]}>
               <Ionicons name="lock-closed-outline" size={20} color="#7C6F9B" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
@@ -143,7 +145,8 @@ export default function LoginScreen() {
                 onChangeText={(t) => { setPassword(t); setErrors(e => ({ ...e, password: undefined })); }}
                 secureTextEntry={!showPassword}
                 selectionColor="#7C6F9B"
-                underlineColorAndroid="transparent"
+                onFocus={() => setFocusedInput('password')}
+                onBlur={() => setFocusedInput(null)}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
                 <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#999" />
@@ -154,7 +157,7 @@ export default function LoginScreen() {
             )}
 
             {isRegistering && (
-              <View style={styles.inputContainer}>
+              <View style={[styles.inputContainer, focusedInput === 'confirm' && styles.inputContainerFocused]}>
                 <Ionicons name="lock-closed-outline" size={20} color="#7C6F9B" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
@@ -164,7 +167,8 @@ export default function LoginScreen() {
                   onChangeText={(t) => { setConfirmPassword(t); setErrors(e => ({ ...e, confirm: undefined })); }}
                   secureTextEntry={!showPassword}
                   selectionColor="#7C6F9B"
-                  underlineColorAndroid="transparent"
+                  onFocus={() => setFocusedInput('confirm')}
+                  onBlur={() => setFocusedInput(null)}
                 />
               </View>
             )}
@@ -244,8 +248,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     borderRadius: 14, marginBottom: 8, paddingHorizontal: 14,
   },
+  inputContainerFocused: {
+    borderWidth: 2,
+    borderColor: '#7C6F9B',
+  },
   inputIcon: { marginRight: 10 },
-  input: { flex: 1, paddingVertical: 16, fontSize: 16, color: '#333', outlineWidth: 0 },
+  input: { flex: 1, paddingVertical: 16, fontSize: 16, color: '#333' },
   eyeBtn: { padding: 6 },
   errorText: { color: '#E74C3C', fontSize: 12, marginBottom: 8, marginLeft: 4 },
   
