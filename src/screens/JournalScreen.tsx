@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '../theme/colors';
@@ -10,7 +11,8 @@ import MoodSelector from '../components/MoodSelector';
 import EmptyState from '../components/EmptyState';
 import { Mood, EmotionEntry } from '../types';
 
-export default function JournalScreen() {
+export default function JournalScreen({ route }: any) {
+  const navigation = useNavigation();
   const { entries, addEntry, deleteEntry } = useStore();
   const colors = useThemeColors();
   const [modalVisible, setModalVisible] = useState(false);
@@ -18,6 +20,21 @@ export default function JournalScreen() {
   const [note, setNote] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (route?.params?.openModal) {
+      setModalVisible(true);
+    }
+  }, [route?.params]);
+
+  useEffect(() => {
+    const unsubscribe = navigation?.addListener('focus', () => {
+      if (route?.params?.openModal) {
+        setModalVisible(true);
+      }
+    });
+    return unsubscribe;
+  }, [navigation, route?.params]);
 
   const handleSave = () => {
     if (!selectedMood) return;

@@ -53,6 +53,7 @@ function TabNavigator() {
           elevation: 8,
         },
         tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
+        unmountOnBlur: false,
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Início' }} />
