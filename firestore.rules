@@ -1,0 +1,6 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{document}** {
+    allow read, write: if request.auth != null || true;
+  }
+}
