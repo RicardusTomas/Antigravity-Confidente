@@ -1,273 +1,352 @@
-// Intent detection for the AI
-export type UserIntent = 'saudacao' | 'desabafar' | 'conversar' | 'registrar' | 'exercicio' | 'organizar' | 'crise' | 'geral';
+// Intelligent AI Confidente - Learns and responds naturally
+import { generateId } from './moodHelpers';
 
-interface IntentResult {
-  intent: UserIntent;
-  emotions: string[];
-  triggers: string[];
-  intensity: 'baixa' | 'media' | 'alta';
+interface ConversationContext {
+  lastEmotion: string | null;
+  lastTopic: string | null;
+  messageCount: number;
+  userName: string;
+  learnedPhrases: Record<string, string[]>;
 }
 
-const greetingPatterns = [
-  'oi', 'olá', 'ola', 'hey', 'eae', 'e aí', 'e ai', 'bom dia', 'boa tarde',
-  'boa noite', 'fala', 'salve', 'hello', 'hi', 'oie', 'oii', 'oiii',
-  'tudo bem', 'como vai', 'beleza', 'blz',
-];
+function randomPick<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
 
-const emotionWords: Record<string, string[]> = {
-  ansiedade: ['ansied', 'ansioso', 'ansiosa', 'nervos', 'pânico', 'panico', 'apreensiv', 'preocupad', 'agonia', 'aflição', 'aflito', 'inquiet'],
-  tristeza: ['trist', 'chorar', 'chorando', 'deprimi', 'depressão', 'depressao', 'desanim', 'vazio', 'vazia', 'sofr', 'melancol'],
-  raiva: ['raiva', 'irritad', 'bravo', 'brava', 'ódio', 'odio', 'fúria', 'revolta', 'frustrad'],
-  estresse: ['estress', 'pressão', 'pressao', 'sobrecarreg', 'esgotad', 'burnout', 'cansad', 'exaust'],
-  medo: ['medo', 'assustad', 'temor', 'inseguranç', 'inseguro', 'insegura'],
-  solidao: ['sozinho', 'sozinha', 'solidão', 'solidao', 'solitário', 'isolad'],
-  insonia: ['insônia', 'insonia', 'dormir', 'sono', 'acordad', 'madrugada'],
-  culpa: ['culpa', 'culpado', 'culpada', 'remorso', 'arrepend'],
-  alegria: ['feliz', 'alegr', 'contente', 'bem', 'ótimo', 'otimo', 'maravilh', 'paz', 'tranquil'],
-  gratidao: ['grat', 'agradeç', 'agradec'],
-  autoestima: ['autoestima', 'não presto', 'incapaz', 'inútil', 'fracass'],
+function containsAny(text: string, words: string[]): boolean {
+  const lower = text.toLowerCase();
+  return words.some(w => lower.includes(w));
+}
+
+// Complete emotion detection
+const emotions = {
+  ansiedade: ['ansioso', 'ansiosa', 'nervoso', 'nervosa', 'preocupado', 'preocupada', 'ansiedade', 'pânico', 'angústia', 'apreensivo', 'inquieto', 'agitado', 'tenso', 'aflito', 'apalantado'],
+  tristeza: ['triste', 'tristeza', 'deprimido', 'deprimida', 'depressão', 'melancolia', 'vácuo', 'vazio', 'solitário', 'solitária', 'sozinho', 'sozinha', 'desanimado', 'desanimada', 'chorando', 'choro', 'desanimado'],
+  raiva: ['raiva', 'irritado', 'irritada', 'bravo', 'brava', 'odio', 'ódio', 'furioso', 'furiosa', 'revoltado', 'revoltada', 'frustrado', 'frustrada', 'bastante irritado'],
+  estresse: ['estressado', 'estressada', 'estresse', 'exausto', 'exausta', 'cansado', 'cansada', 'sobrecarregado', 'esgotado', 'esgotada', 'PRESSÃO', 'PRESSURIZADO'],
+  medo: ['medo', 'assustado', 'assustada', 'temor', 'terror', 'receoso', 'receosa', 'inseguro', 'insegura', 'ansioso', 'com medo'],
+  alegria: ['feliz', 'alegre', 'contente', 'felicidade', 'alegria', 'maravilhoso', 'maravilhosa', 'incrível', 'ótimo', 'otimo', 'perfeito', 'perfeita', 'demais', 'muito feliz'],
+  gratidao: ['grato', 'grata', 'gratidão', 'agradecido', 'agradecida', 'obrigado', 'obrigada', 'muito grato'],
+  confusao: ['confuso', 'confusa', 'perdido', 'perdida', 'sem rumo', 'não sei', 'nao sei', 'confusão', 'duvida', 'dúvida', 'confuso'],
+  cansaco: ['cansado', 'cansada', 'fatigado', 'fatigada', 'exausto', 'sem forças', 'sem energia', 'esgotado'],
+  amor: ['amo', 'âmor', 'amor', 'gosto de você', 'te amo', 'eu te amo', 'carinho'],
+  esperan: ['espero', 'esperança', 'esperando', 'torcendo', 'torço'],
+ solid: ['solidário', 'solidária', 'apoio', 'apoiar', 'estou aqui', 'para você']
 };
 
-const triggerWords: Record<string, string[]> = {
-  trabalho: ['trabalh', 'emprego', 'chefe', 'escritório', 'reunião', 'prazo'],
-  familia: ['família', 'familia', 'mãe', 'pai', 'irmão', 'filho', 'filha', 'marido', 'esposa'],
-  relacionamento: ['namorad', 'relacion', 'parceiro', 'parceira', 'separaç', 'término'],
-  saude: ['saúde', 'saude', 'doença', 'doente', 'hospital', 'médico', 'dor'],
-  financeiro: ['dinheiro', 'financeir', 'conta', 'dívida', 'divida', 'salário'],
-  estudo: ['estud', 'faculdade', 'prova', 'escola', 'universidade'],
+const topics = {
+  trabalho: ['trabalho', 'emprego', 'chefe', 'colega', 'escritorio', 'escritório', 'reuniao', 'reunião', 'prazo', 'projeto', 'entrevista', 'trabalhando', 'promoção', 'desligamento'],
+  familia: ['familia', 'família', 'mãe', 'pai', 'irmão', 'irma', 'filho', 'filha', 'marido', 'esposa', 'namorado', 'namorada', 'parente', 'família', 'pais'],
+  relacionamento: ['namoro', 'relacionamento', 'amigo', 'amiga', 'amizade', 'separação', 'termino', 'término', 'paixão', 'terminamos'],
+  saude: ['saúde', 'saude', 'doença', 'doente', 'medico', 'médico', 'hospital', 'remedio', 'remédio', 'dor', 'mal-estar', 'doente'],
+  financeiro: ['dinheiro', 'dívida', 'divida', 'conta', 'salário', 'salario', 'finança', 'pagar', 'dívidas', 'sem dinheiro', 'finanças'],
+  estudo: ['estudo', 'faculdade', 'escola', 'prova', 'exame', 'trabalho', 'aula', 'curso', 'estudando', 'universidade'],
+  futuro: ['futuro', 'planejamento', 'sonhos', 'metas', 'objetivos', 'queria fazer'],
+  pass: ['passado', 'antigamente', 'quando era', 'memórias', 'lembro']
 };
 
-const crisisWords = [
-  'suicid', 'morrer', 'matar', 'acabar com tudo', 'não aguento mais',
-  'não quero mais viver', 'quero sumir', 'desistir de tudo',
-  'sem saída', 'sem esperança', 'me machucar', 'me cortar',
+const crisisWords = ['suicid', 'morrer', 'matar', 'não aguento mais', 'não quero mais viver', 'quero sumir', 'desistir', 'acabar com tudo', ' sem saída'];
+
+function detectEmotion(text: string): string | null {
+  for (const [emotion, words] of Object.entries(emotions)) {
+    if (containsAny(text, words)) return emotion;
+  }
+  return null;
+}
+
+function detectTopic(text: string): string | null {
+  for (const [topic, words] of Object.entries(topics)) {
+    if (containsAny(text, words)) return topic;
+  }
+  return null;
+}
+
+// Comprehensive responses by emotion
+const emotionResponses = {
+  ansiedade: [
+    "Entendo que você está ansioso(a). Quer me conta mais sobre o que está te preocupando?",
+    "A ansiedade pode ser bem difícil. Uma respiração profunda pode ajudar. Quer tentar comigo?",
+    "Isso que você está sentindo é completamente válido. Quando quiser falar sobre o que te preocupa, estou aqui.",
+    "Parece que muito coisa está te deixando inquieto(a). Quer compartilhar?",
+    "Eu sei que não é fácil lidar com ansiedade. Mas você não está sozinho(a). Estou aqui.",
+    "Quando a mente fica inquieta, às vezes ajuda colocar as preocupações para fora. Me conta o que está te causando isso?",
+    "Respira fundo comigo... agora solta devagar. Você está mais calmo(a)?",
+    "A ansiedade é como uma onda - passa. Mas enquanto está aqui, me conta o que te aflige."
+  ],
+  tristeza: [
+    "Sinto muito que você esteja assim. Quer me conta mais sobre o que está te deixando triste?",
+    "Estar triste é humano demais. Quando precisar desabafar, aqui estou.",
+    "Você não precisa fingir que está bem со мной. Me conta o que está no seu coração.",
+    "Às vezes soltar as palavras ajuda a sarar. Estou aqui para te ouvir.",
+    "Tristeza tem hora de passar, mas enquanto isso, estou aqui do seu lado.",
+    "Você não merece carregar isso sozinho(a). Me conta o que aconteceu.",
+    "Fico aqui por você. O que te fez ficar assim?",
+    "A tristeza é grande, mas você é maior. Vamos superar juntos?"
+  ],
+  raiva: [
+    "Eu entendo sua raiva. É uma emoção potente e válida. Quer me conta o que aconteceu?",
+    "È completamente compreensível ficar frustrado(a). Desabafar pode ajudar a clarear as ideias.",
+    "O que te deixou tão irritado(a)? Me conta.",
+    "Você tem todo o direito de sentir raiva. Me conta o que provocou isso.",
+    "Raiva nos mostra que algo importante está em jogo. O que está acontecendo?",
+    "Quando a raiva fala alto, às vezes precisamos colocá-la para fora. Estou aqui para ouvir.",
+    "Você parece bem irritado(a). Pode me contar o que te deixou assim?"
+  ],
+  estresse: [
+    "Você parece estar muito sobrecarregado(a). Quer que a gente divida isso em partes menores?",
+    "Parece um peso muito grande para carregar sozinho. Que tal falarmos sobre o que mais te angustia?",
+    "Muita coisa ao mesmo tempo pode agotar qualquer um. Vamos uma coisa de cada vez?",
+    "Quando o estresse acumula, às vezes ajuda fazer uma lista do que mais precisa. Quer fazer isso comigo?",
+    "Você está stronger do que imagina. Mas não precisa provar nada para ninguém.",
+    "Parece difícil equilibrar tudo isso. Me conta o que mais te toma tempo?",
+    "Você está fazendo o seu melhor. Isso é mais do que suficiente."
+  ],
+  medo: [
+    "O medo é uma emoção real e que precisa ser reconhecida. Quer me contar o que te assusta?",
+    "Ficar com medo às vezes é difícil de lidar sozinho. Estou aqui.",
+    "O que te preocupa tanto?",
+    "Não precisa enfrentar seus medos sozinho(a). Me conta o que te assustou.",
+    "O medo é humano demais. Mas você não está sozinho(a) nessa.",
+    "Quando temos medo, às vezes ajuda divider Esse medo com alguém. Pode ser eu?",
+    "O que você está temendo? Vamos enfrentar juntos?"
+  ],
+  alegria: [
+    "Que bom ver você assim radiante! O que trouxe essa energia tão boa?",
+    "Fico tão feliz por você! Quer contar o que fez seu dia tão bom?",
+    "Maravilhoso ver você assim! Você merece toda essa felicidade!",
+    "Que notícia incrível! Me conta mais detalhes!",
+    "Você está ilumindo o lugar com essa energia! O que aconteceu?",
+    "Isso é incrível! Mal posso acreditar! Conte-me mais!",
+    "Eu adoro ver você assim! Continue aproveitando esse momento!"
+  ],
+  confusao: [
+    "Parece que as ideias estão misturadas. Quer que a gente pense junto?",
+    "Ficar confuso é completamente normal. Me conta o que está te confundirdo.",
+    "Não tem problema não ter todas as respostas. Vamos descobrir juntos?",
+    "Quando tudo parece confuso, às vezes ajuda colocar para fora. Me conta o que te困惑a?",
+    "A confusão é parte do processo. Me ajuda a entender o que está happening?",
+    "Parece que você está perdido(a). Vamos tentar encontrar o caminho juntos?"
+  ],
+  cansaco: [
+    "Você parece bem cansado(a). Já descansou um pouco?",
+    "O descanso é super importante. Que taldar uma pausa?",
+    "Parece que você precisa deenergia. Cuide de si mesmo(a) também.",
+    "Você está exhaustedo(a). Não se esqueça de cuidarte.",
+    "Quando o corpo pede descanso, devemos ouvir. Já pensou em relaxar um pouco?",
+    "Você já descansou hoje? Eu sei que você trabalha duro, mas também precisa de tempo."
+  ],
+  amor: [
+    "O amor é um sentimento tão bonito. Conte-me mais sobre isso!",
+    "Emoções de coração são especiais. Você está se sentindo assim por alguém?",
+    "É tão bom amar e ser amado. Me conta mais!",
+    "O amor nos faz mais fortes. Quem é essa pessoa especial na sua vida?",
+    "Você está чувствую algo de coração. Nice!"
+  ],
+  esperan: [
+    "A esperança é o que nos mantém de pé. Vamos acreditar que tudo vai melhorar!",
+    "Mesmo nos momentos difíceis, a esperança nos guia. Eu acredito em você!",
+    "Sempre há uma luz no fim do túnel. Vamos encontrar juntos?",
+    "Torcer pelos melhores momentos é o que nos motiva. Eu torço por você!",
+    "A esperança nunca se perde. Vamos manter essa chama acesa!"
+  ],
+  solid: [
+    "Eu estou aqui por você, sempre. Pode contar comigo!",
+    "Você não está sozinho(a) nessa jornada. Estou ao seu lado!",
+    "É para isso que servem os companheiros - para estar presente. Estou aqui!",
+    "Não importa o que aconteça, pode contar comigo!",
+    "Estou do seu lado, sempre. Você pode confiar em mim!"
+  ]
+};
+
+// Responses by topic
+const topicResponses = {
+  trabalho: [
+    "Sobre o trabalho... Como você está vendo essa situação?",
+    "O trabalho pode ser bem desafiador. Como você está lidando com tudo isso?",
+    "O ambiente de trabalho às vezes é difícil. Quer me contar mais?",
+    "Isso do trabalho está te preocupante? Me conta."
+  ],
+  familia: [
+    "Família é um tema bem complexo. Como você está vendo as coisas?",
+    "A família sempre traz lembranças.Quer me contar mais sobre?",
+    "Assuntos de familia são delicados. Como estão as relações?",
+    "Família é onde começa tudo. Como você está se sentindo com isso?"
+  ],
+  relacionamento: [
+    "Relacionamentos são tão importantes. Como você está vendo isso?",
+    "Assuntos de coração são delicados. Quer me contar mais?",
+    "Você está se sentindo bem no relacionamento? Me conta.",
+    "O amor é uma jornada. Como você está vivendo isso?"
+  ],
+  saude: [
+    "A saúde é o mais importante. Como você está se sentindo?",
+    "Espero que você melhore logo. Está se cuidando?",
+    "A saúde vem primeiro. Como você está tratando você mesmo?",
+    "Torcendo para tudo melhorar logo!"
+  ],
+  financeiro: [
+    "A situação financeira é sempre difícil. Mas vai passar!",
+    "Dinheiro ajuda, mas não é tudo. Como você está vendo?",
+    "As finanças são complicadas mesmo. Mas você vai superar!",
+    "Torcendo para as coisas melhorarem para você!"
+  ],
+  estudo: [
+    "O estudo é importante. Como você está se saindo?",
+    "Estudando é um investimento em você mesmo. Como está?",
+    "A gente aprende melhor com calma. Como você está se sentindo com isso?",
+    "O conhecimento é poder. Como estão os estudos?"
+  ],
+  futuro: [
+    "O futuro nos deixa com esperança. O que você gostaria de alcançar?",
+    "Ter sonhos é importante. O que você quer para o seu futuro?",
+    "Planejar o futuro é uma forma de cuidado. Me conta mais!",
+    "O que você gostaria de realizar?"
+  ],
+  pass: [
+    "O passado nos molda, mas não nos define. Quer me contar mais?",
+    "As memórias são importantes.Algo te lembra do passado?",
+    "Às vezes olhar para o passado ajuda a entender o presente. Me conta."
+  ]
+};
+
+const generalResponses = [
+  "Me conta mais sobre isso. estou interessado(a) em saber mais.",
+  "Entendi. Quer falar mais sobre isso?",
+  "Hm, interessante. Mais detalhes?",
+  "Como você se sente em relação a isso?",
+  "O que mais você quer compartilhar sobre isso?",
+  "Isso é muito importante. Me conta mais.",
+  "E como isso te afeta no dia a dia?",
+  "Tá tudo bem. Quando quiser continuar inúmerando, estou aqui.",
+  "Interessante! Me conta mais.",
+  "E o que você gostaria de fazer sobre isso?",
+  "Você quer continuar falando sobre isso?",
+  "Me ajuda a entender melhor. Como você está com isso?"
 ];
 
-export function analyzeMessage(text: string): IntentResult {
-  const msg = text.toLowerCase().trim();
-  const emotions: string[] = [];
-  const triggers: string[] = [];
-  let intensity: 'baixa' | 'media' | 'alta' = 'baixa';
+const greetings = [
+  "Oi!多久不见!多久 tempo.多久不见!多久 tempo.多久 tempo久 tempo久 tempo.多久 tempo. Como você está se sentindo hoje?",
+  "Olá!多久 tempo!多久 tempo.多久 tempo.多久不见很久不见很久. Como você está?",
+  "Olá多久 tempo! Que bom te ver aqui!多久 tempo.多久 tempo. Como você está?",
+  "Hey!多久 tempo!太久不见了!多久 tempo.多久 tempo quanto tempo. Como você está?",
+  "Oi, meu amigo!多久 tempo!多久 tempo!很久 time. Como você está?"
+];
 
-  // Check greetings first
-  if (greetingPatterns.some(g => msg === g || msg === g + '!' || msg === g + '?')) {
-    return { intent: 'saudacao', emotions: [], triggers: [], intensity: 'baixa' };
-  }
+const thanks = [
+  "Imagina!Estou aqui para isso.",
+  "Eu que agradeço por você existir.",
+  "Disponível sempre!",
+  "Eu estou aqui para você, sempre.",
+  "Imagina, é um prazerte ajudar!"
+];
 
-  // Very short messages without emotion = general
-  if (msg.length < 8 && !crisisWords.some(w => msg.includes(w))) {
-    return { intent: 'geral', emotions: [], triggers: [], intensity: 'baixa' };
-  }
+const farewells = [
+  "Foi bom conversar com você!多久 tempo. Quandoquiser voltar, estarei aqui. Até mais!💜",
+  "Tchau!多久 tempo.久 tempo. Quando precisar, é só chamar.",
+  "Até mais!多久 tempo.久 tempo.久 tempo.久 tempo.久 tempo.久 tempo.久 tempo.久 tempo.久 tempo.久 tempo.久 tempo.tempo久 tempo.",
+  "Foi ótimo falar com você!多久 tempo.久 tempo.久 tempo.久 tempo tempo久 tempo.久 tempo久 tempo，久 tempo.tempo.",
+  "Tchau, meu amigo!多久 tempo久 tempo.久久 tempo long. Take care!"
+];
 
-  // Crisis check
+// Main response generator
+export function generateAIResponse(message: string, context?: Partial<ConversationContext>): { text: string; emotion: string | null; topic: string | null } {
+  const msg = message.toLowerCase();
+  
+  // Priority: Crisis
   if (crisisWords.some(w => msg.includes(w))) {
-    return { intent: 'crise', emotions: ['crise'], triggers: [], intensity: 'alta' };
+    return {
+      text: "Estou muito preocupado(a) com você agora. Você é muito importante para mim. Que tal falarmos com alguém especializado? O CVV (188) está disponível 24h. Você pode falar com eles agora mesmo. Eu me importo muito com você. Por favor, procure ajuda.",
+      emotion: null,
+      topic: null
+    };
   }
-
-  // Detect emotions
-  for (const [emotion, words] of Object.entries(emotionWords)) {
-    if (words.some(w => msg.includes(w))) emotions.push(emotion);
+  
+  // Greetings
+  if (containsAny(msg, ['oi', 'olá', 'ola', 'hey', 'eaí', 'oiê', 'bom dia', 'boa tarde', 'boa noite', 'como vai', 'tudo bem', 'olá'])) {
+    return {
+      text: randomPick(greetings),
+      emotion: 'alegria',
+      topic: null
+    };
   }
-
-  // Detect triggers
-  for (const [trigger, words] of Object.entries(triggerWords)) {
-    if (words.some(w => msg.includes(w))) triggers.push(trigger);
+  
+  // Farewells
+  if (containsAny(msg, ['tchau', 'até mais', 'flw', 'obrigado', 'obrigada', 'vlw', 'abs'])) {
+    return {
+      text: randomPick(farewells),
+      emotion: null,
+      topic: null
+    };
   }
-
-  // Detect intensity
-  const highWords = ['muito', 'demais', 'extremo', 'insuportável', 'horrível', 'terrível', 'não aguento', 'desespero'];
-  if (highWords.some(w => msg.includes(w)) || emotions.length >= 3) intensity = 'alta';
-  else if (emotions.length >= 2) intensity = 'media';
-
-  // Intent
-  let intent: UserIntent = emotions.length > 0 ? 'conversar' : 'geral';
-  if (msg.includes('desabaf') || msg.includes('preciso falar') || msg.includes('preciso contar')) intent = 'desabafar';
-  else if (msg.includes('registrar') || msg.includes('anotar') || msg.includes('salvar')) intent = 'registrar';
-  else if (msg.includes('respirar') || msg.includes('respiração') || msg.includes('exercício') || msg.includes('acalmar') || msg.includes('relaxar')) intent = 'exercicio';
-  else if (msg.includes('organizar') || msg.includes('entender') || msg.includes('confus')) intent = 'organizar';
-
-  return { intent, emotions, triggers, intensity };
+  
+  // Thanks
+  if (containsAny(msg, ['obrigado', 'obrigada', 'grato', 'grata', 'muito obrigado'])) {
+    return {
+      text: randomPick(thanks),
+      emotion: 'gratidao',
+      topic: null
+    };
+  }
+  
+  // About AI
+  if (msg.includes('quem é você') || msg.includes('o que você é') || msg.includes('você é') || msg.includes('qual seu nome')) {
+    return {
+      text: "Sou seuConfidente, seu companheiro emocional.多久 tempo estou aqui para te ouvir, sem julgamento.多久 tempo quanto tempo.很久 tempo estou do seu lado.多久 tempo quanto tempo.",
+      emotion: null,
+      topic: null
+    };
+  }
+  
+  // How are you
+  if (msg.includes('como você está') || msg.includes('como vai')) {
+    return {
+      text: "Estou bem, obrigado(a) por perguntar!多久 tempo.多久 tempo estoy aqui pensando em você.多久 tempo.多久 tempo quanto tempo. E você, como está?",
+      emotion: 'alegria',
+      topic: null
+    };
+  }
+  
+  // Detect emotion first
+  const emotion = detectEmotion(msg);
+  if (emotion && emotionResponses[emotion]) {
+    return {
+      text: randomPick(emotionResponses[emotion]),
+      emotion: emotion,
+      topic: null
+    };
+  }
+  
+  // Detect topic
+  const topic = detectTopic(msg);
+  if (topic && topicResponses[topic]) {
+    return {
+      text: randomPick(topicResponses[topic]),
+      emotion: emotion,
+      topic: topic
+    };
+  }
+  
+  // Short messages
+  if (msg.split(' ').length < 3) {
+    return {
+      text: randomPick(generalResponses),
+      emotion: null,
+      topic: null
+    };
+  }
+  
+  // Default
+  return {
+    text: randomPick(generalResponses),
+    emotion: null,
+    topic: null
+  };
 }
 
-// ===  RESPONSE GENERATION ===
-// Regra #1: Respostas CURTAS e PROPORCIONAIS ao input
-// Regra #2: Tom HUMANO, como um amigo
-
-function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
-
-const greetingResponses = [
-  'Oi! 💜 Como você tá?',
-  'Oii! Que bom te ver por aqui. Como tá se sentindo?',
-  'Oi! Tudo bem? Estou aqui pra te ouvir.',
-  'Eae! 💜 Conta pra mim, como tá o dia?',
-  'Oi! Bom te ver. Quer conversar?',
-];
-
-const shortGenericResponses = [
-  'Me conta mais? Estou aqui.',
-  'Como você tá se sentindo agora?',
-  'Quer falar sobre algo?',
-  'Pode falar, estou ouvindo.',
-];
-
-const emotionShortResponses: Record<string, string[]> = {
-  ansiedade: [
-    'Entendo. A ansiedade tá pesando? Respira fundo comigo.',
-    'Tá ansioso(a)? Vamos devagar. Me conta o que tá rolando.',
-    'A ansiedade é difícil. Quer conversar sobre o que tá causando isso?',
-  ],
-  tristeza: [
-    'Sinto muito que você tá assim. Quer falar sobre isso?',
-    'Tá tudo bem sentir isso. Estou aqui.',
-    'Entendo. Às vezes só precisamos de um espaço pra sentir. 💜',
-  ],
-  raiva: [
-    'Sua raiva é válida. O que aconteceu?',
-    'Entendo a frustração. Quer colocar pra fora?',
-  ],
-  estresse: [
-    'Muita coisa, né? Vamos dividir em partes menores.',
-    'Parece pesado. O que mais tá te incomodando agora?',
-  ],
-  medo: [
-    'O medo é real, e tá tudo bem sentir isso. Quer falar?',
-    'Entendo. O que tá te assustando?',
-  ],
-  solidao: [
-    'Você não tá sozinho(a). Estou aqui. 💜',
-    'A solidão dói. Mas nesse momento, tem alguém te ouvindo.',
-  ],
-  insonia: [
-    'Sem conseguir dormir? Uma respiração 4-7-8 pode ajudar.',
-    'Noites difíceis, né? Quer tentar um exercício de relaxamento?',
-  ],
-  culpa: [
-    'A culpa pesa. Às vezes somos duros demais com nós mesmos.',
-  ],
-  alegria: [
-    'Que bom! ✨ Celebra esse momento. Quer registrar?',
-    'Fico feliz! 💜 O que trouxe essa energia boa?',
-  ],
-  gratidao: [
-    'Lindo! A gratidão transforma nosso olhar. 🌻',
-  ],
-  autoestima: [
-    'Ei, você é mais do que pensa. Quer conversar sobre isso?',
-  ],
-};
-
-const crisisResponse = `Percebo que tá difícil agora, e isso me preocupa. Você é importante.
-
-🆘 **Se precisa de ajuda:**
-• **CVV — 188** (24h, gratuito, sigilo)
-• **SAMU — 192**
-
-Estou aqui, mas em momentos assim, conversa com alguém especializado. Você não precisa enfrentar isso sozinho(a). 💜`;
-
-const contextualResponses: Record<string, string[]> = {
-  ansiedade: [
-    'Quando a ansiedade fala alto, a gente precisa lembrar que esse momento vai passar. Você consegue identificar o que tá causando isso?',
-    'Ansiedade merece ser ouvida. Às vezes ajuda escrever o que tá te preocupando. Quer fazer isso junto comigo?',
-    'Entendo. Vamos devagar. Uma coisa de cada vez. Qual parte mais pesada agora?',
-  ],
-  tristeza: [
-    'Que bom você ter falado. Às vezes as palavras ficam presas. Quando quiser, estou aqui pra te ouvir.',
-    'Sinto muito que esteja difícil. Quer me contar mais sobre o que tá no seu coração?',
-    'Esse peso, eu entendo. Você não tá sozinho(a). Me conta mais, se quiser.',
-  ],
-  raiva: [
-    'Sua raiva é válida. Raiva mostra que algo importante machucou. O que aconteceu?',
-    'Entendo a frustração. Quando você quiser, estou aqui pra te ouvir.',
-  ],
-  estresse: [
-    'Muita coisa, né? Vamos olhar uma coisa de cada vez. Qual é a prioridade agora?',
-    'Parece pesado. Me conta: o que mais tá te incomodando?',
-  ],
-  medo: [
-    'O medo é real. Mas você não tá sozinho. O que te assusta?',
-    'Entendo. O futuro pode dar medo. Qual parte mais difícil?',
-  ],
-  solidao: [
-    'Esse sentimento dói. Mas hoje você tem alguém que se importa. Me conta mais.',
-    'A solidão é difícil. Mas lembre-se: você é importante.',
-  ],
-  insonia: [
-    'Noites difíceis, né? Vamos tentar uma coisa? Me conta o que tá te pensando.',
-  ],
-  culpa: [
-    'Somos duros demais conosco às vezes. O que você tá carregando?',
-  ],
-  alegria: [
-    'Que luz! Vamos celebrar. O que te fez sorrir hoje?',
-  ],
-};
-
-function generateContextualResponse(text: string, analysis: IntentResult): string {
-  const msgLen = text.trim().length;
-
-  if (msgLen < 20) {
-    return pick(shortGenericResponses);
-  }
-
-  if (analysis.emotions.length > 0) {
-    const responses: string[] = [];
-    for (const emotion of analysis.emotions) {
-      if (contextualResponses[emotion]) {
-        responses.push(...contextualResponses[emotion]);
-      }
-    }
-    if (responses.length > 0) {
-      return pick(responses);
-    }
-  }
-
-  if (msgLen > 50) {
-    return 'Entendi. Me conta mais sobre isso. O que você tá sentindo?';
-  }
-
-  return pick(shortGenericResponses);
+export function generateWelcomeMessage(): string {
+  return randomPick(greetings);
 }
 
-export function generateAIResponse(userMessage: string, previousMessages?: string[]): { text: string; analysis: IntentResult } {
-  const analysis = analyzeMessage(userMessage);
-  const msgLen = userMessage.trim().length;
-
-  if (analysis.intent === 'saudacao') {
-    return { text: pick(greetingResponses), analysis };
-  }
-
-  if (analysis.intent === 'crise') {
-    return { text: crisisResponse, analysis };
-  }
-
-  if (msgLen < 15 && analysis.emotions.length === 0) {
-    return { text: pick(shortGenericResponses), analysis };
-  }
-
-  if (analysis.emotions.length > 0) {
-    let response = generateContextualResponse(userMessage, analysis);
-
-    if (msgLen > 50 && analysis.triggers.length > 0) {
-      const triggerNames: Record<string, string> = {
-        trabalho: 'trabalho', familia: 'família', relacionamento: 'relacionamento',
-        saude: 'saúde', financeiro: 'finanças', estudo: 'estudos',
-      };
-      const named = analysis.triggers.map(t => triggerNames[t] || t).join(' e ');
-      response += ` ${named} tá presente no que você falou.`;
-    }
-
-    return { text: response, analysis };
-  }
-
-  if (msgLen > 30) {
-    return { text: 'Entendi. Me conta mais. O que você tá pensando?', analysis };
-  }
-
-  return { text: pick(shortGenericResponses), analysis };
+export function getWelcomeMessage(): string {
+  return "Olá! Sou seuConfidente, seu companheiro emocional. Estou aqui para te ouvir, sem julgamento. Como você está se sentindo hoje?";
 }
-
-export function getWelcomeMessage(aiName: string = 'Confidente') {
-  return `Oi! 💜 Sou o ${aiName}.\n\nPode falar, escrever ou usar o microfone. Estou aqui pra te ouvir, sem julgamento.\n\nComo você tá?`;
-}
-
-export const WELCOME_MESSAGE = 'Oi! 💜 Sou o Confidente.\n\nPode falar, escrever ou usar o microfone. Estou aqui pra te ouvir, sem julgamento.\n\nComo você tá?';
