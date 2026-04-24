@@ -130,20 +130,21 @@ export default function HomeScreen({ navigation }: any) {
         {/* Seção de Ações Principais */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>O que você precisa agora?</Text>
         <View style={styles.actionsGrid}>
-          {mainActions.map((action, index) => (
+          {mainActions.map((action) => (
             <TouchableOpacity
               key={action.id}
               style={[styles.actionCard, { backgroundColor: colors.card }]}
-              onPress={() => {
-                if (action.screen === 'Wellness') {
-                  navigation.navigate('Wellness');
-                } else if (action.screen === 'ChatVoice') {
-                  navigation.navigate('ChatVoice');
-                } else if (action.screen === 'NewEntry') {
-                  navigation.navigate('NewEntry');
-                }
-              }}
+              onPress={() => navigation.navigate(action.screen as any)}
               activeOpacity={0.75}
+            >
+              <View style={[styles.actionIconWrap, { backgroundColor: action.bg }]}>
+                <Ionicons name={action.icon as any} size={26} color={action.color} />
+              </View>
+              <Text style={[styles.actionLabel, { color: colors.text }]}>{action.label}</Text>
+              <Text style={[styles.actionDesc, { color: colors.textSecondary }]}>{action.desc}</Text>
+              <View style={[styles.actionArrow, { backgroundColor: action.bg }]}>
+                <Ionicons name="arrow-forward" size={14} color={action.color} />
+              </View>
             </TouchableOpacity>
           ))}
         </View>
