@@ -245,12 +245,10 @@ const styles = StyleSheet.create({
   inputWrapper: {},
   inputContainer: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#F5F5F5',
     borderRadius: 14, marginBottom: 8, paddingHorizontal: 14,
   },
   inputContainerFocused: {
-    borderWidth: 2,
-    borderColor: '#7C6F9B',
+    backgroundColor: '#EDE8FF',
   },
   inputIcon: { marginRight: 10 },
   input: { flex: 1, paddingVertical: 16, fontSize: 16, color: '#333' },
