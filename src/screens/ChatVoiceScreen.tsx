@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
 import { useNavigation } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useThemeColors } from '../theme/colors';
 import { useStore } from '../store/useStore';
 import ChatBubble from '../components/ChatBubble';
@@ -47,8 +46,8 @@ export default function ChatVoiceScreen({ route }: any) {
   };
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
-      <LinearGradient colors={[colors.primary, colors.primaryLight]} style={styles.header}>
+    <View style={[styles.safe, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.primary }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
           <Ionicons name="close" size={24} color="#FFF" />
         </TouchableOpacity>
@@ -64,7 +63,7 @@ export default function ChatVoiceScreen({ route }: any) {
             <Ionicons name="bookmark" size={20} color="#FFF" />
           </TouchableOpacity>
         </View>
-      </LinearGradient>
+      </View>
 
       <FlatList
         ref={listRef}
