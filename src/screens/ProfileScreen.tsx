@@ -131,19 +131,22 @@ export default function ProfileScreen() {
 
         {/* Settings */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Configurações</Text>
-        <TouchableOpacity style={[styles.settingRow, { backgroundColor: colors.card }]} onPress={handleClearChat}>
+        <TouchableOpacity 
+          style={[styles.settingRow, { backgroundColor: colors.card }]} 
+          onPress={handleClearChat}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Ionicons name="trash-outline" size={20} color={colors.error} />
           <Text style={[styles.settingLabel, { color: colors.error }]}>Limpar histórico do chat</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.settingRow, { backgroundColor: colors.card }]} onPress={() => {
-          Alert.alert('Sair', 'Deseja sair da sua conta?', [
-            { text: 'Cancelar', style: 'cancel' },
-            { text: 'Sair', style: 'destructive', onPress: logout },
-          ]);
-        }}>
+        <TouchableOpacity 
+          style={[styles.settingRow, { backgroundColor: colors.card }]} 
+          onPress={() => logout()}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Ionicons name="log-out-outline" size={20} color={colors.error} />
           <Text style={[styles.settingLabel, { color: colors.error }]}>Sair da conta</Text>
-        </TouchableOpacity>
+</TouchableOpacity>
 
         {/* About */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Sobre</Text>
