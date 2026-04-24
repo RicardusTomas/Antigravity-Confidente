@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, StatusBar, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
 import { useNavigation } from '@react-navigation/native';
@@ -14,6 +14,7 @@ export default function ChatVoiceScreen() {
   const { chatMessages, addMessage, clearChat, addEntry, voiceEnabled } = useStore();
   const [text, setText] = useState('');
   const [typing, setTyping] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const listRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -29,11 +30,48 @@ export default function ChatVoiceScreen() {
   }, []);
 
   const speakWithHumanVoice = (text: string) => {
+    Speech.stop();
     Speech.speak(text, {
       language: 'pt-BR',
-      pitch: 1.1,
-      rate: 0.9,
+      pitch: 1.15,
+      rate: 0.95,
     });
+  };
+
+  const startListening = () => {
+    if (isListening) return;
+    
+    setIsListening(true);
+    
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      
+      recognition.lang = 'pt-BR';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setText(transcript);
+        setIsListening(false);
+      };
+      
+      recognition.onerror = (event: any) => {
+        console.log('Speech error:', event.error);
+        setIsListening(false);
+        Alert.alert('Erro', 'Não consegui entender. Tente falar mais alto.');
+      };
+      
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+      
+      recognition.start();
+    } else {
+      setIsListening(false);
+      Alert.alert('Aviso', 'Reconhecimento de voz não disponível neste dispositivo.');
+    }
   };
 
   const handleSend = async () => {
@@ -66,16 +104,21 @@ export default function ChatVoiceScreen() {
         speakWithHumanVoice(response);
       }
       
-      // Check if AI should navigate to a screen
-      if (response.includes('diário') || response.includes('registrar') || response.includes('escrever')) {
-        navigation.navigate('NewEntry');
-      } else if (response.includes('respirar') || response.includes('acalmar') || response.includes('relaxar')) {
-        navigation.navigate('Wellness');
-      } else if (response.includes('humor') || response.includes('como você está')) {
-        navigation.navigate('Journal');
+      const lowerResponse = response.toLowerCase();
+      const lowerUser = userText.toLowerCase();
+      
+      if (lowerResponse.includes('escrever') || lowerResponse.includes('diário') || lowerResponse.includes('registrar') || 
+          lowerUser.includes('escrever') || lowerUser.includes('diário') || lowerUser.includes('registrar')) {
+        setTimeout(() => navigation.navigate('NewEntry'), 1500);
+      } else if (lowerResponse.includes('respirar') || lowerResponse.includes('acalmar') || lowerResponse.includes('relaxar') ||
+                 lowerUser.includes('respirar') || lowerUser.includes('acalmar') || lowerUser.includes('relaxar')) {
+        setTimeout(() => navigation.navigate('Wellness'), 1500);
+      } else if (lowerResponse.includes('ver registro') || lowerResponse.includes('diário') || lowerResponse.includes('humor') ||
+                 lowerUser.includes('ver registro') || lowerUser.includes('meu humor')) {
+        setTimeout(() => navigation.navigate('Journal'), 1500);
       }
     } catch (error) {
-      Alert.alert('Erro', 'Não consegui responder. Tente novamente.');
+      Alert.alert('Erro', 'Não consegui responder. Verifique sua conexão.');
     }
     
     setTyping(false);
