@@ -88,7 +88,7 @@ export default function ChatVoiceScreen({ route }: any) {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
