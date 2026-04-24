@@ -69,9 +69,9 @@ export default function HomeScreen({ navigation }: any) {
 
   const mainActions = [
     { id: 'write', icon: 'create', label: 'Quero escrever', desc: 'Escreva o que está sentindo', color: colors.primary, bg: colors.primaryBg, screen: 'NewEntry' },
-    { id: 'speak', icon: 'mic', label: 'Quero falar', desc: 'Fale com o Confidente por voz', color: colors.calm, bg: darkMode ? '#1E3B33' : '#E4F1EE', screen: 'Chat', params: { mode: 'voice' } },
+    { id: 'speak', icon: 'mic', label: 'Quero falar', desc: 'Fale com o Confidente por voz', color: colors.calm, bg: darkMode ? '#1E3B33' : '#E4F1EE', screen: 'ChatVoice' },
     { id: 'mood', icon: 'happy', label: 'Registrar humor', desc: 'Como está seu dia?', color: colors.accent, bg: darkMode ? '#4A3423' : '#FBECE3', screen: 'NewEntry' },
-    { id: 'calm', icon: 'heart', label: 'Preciso me acalmar', desc: 'Exercícios e acolhimento', color: colors.angry, bg: darkMode ? '#4D2626' : '#F6E6E6', screen: 'Wellness', params: { crisis: true } },
+    { id: 'calm', icon: 'heart', label: 'Preciso me acalmar', desc: 'Exercícios e acolhimento', color: colors.angry, bg: darkMode ? '#4D2626' : '#F6E6E6', screen: 'Wellness' },
   ];
 
   return (

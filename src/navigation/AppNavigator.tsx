@@ -9,6 +9,7 @@ import { useStore } from '../store/useStore';
 import HomeScreen from '../screens/HomeScreen';
 import JournalScreen from '../screens/JournalScreen';
 import ChatScreen from '../screens/ChatScreen';
+import ChatVoiceScreen from '../screens/ChatVoiceScreen';
 import InsightsScreen from '../screens/InsightsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import WellnessScreen from '../screens/WellnessScreen';
@@ -82,9 +83,10 @@ export default function AppNavigator() {
       <NavigationContainer theme={MyTheme}>
         <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
           <Stack.Screen name="Tabs" component={TabNavigator} />
-          <Stack.Screen name="Wellness" component={WellnessScreen} options={{ presentation: 'modal' }} />
-          <Stack.Screen name="Settings" component={SettingsScreen} options={{ presentation: 'modal' }} />
-          <Stack.Screen name="NewEntry" component={NewEntryScreen} options={{ presentation: 'modal' }} />
+          <Stack.Screen name="Wellness" component={WellnessScreen} />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen name="NewEntry" component={NewEntryScreen} />
+          <Stack.Screen name="ChatVoice" component={ChatVoiceScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GlobalBackground>
