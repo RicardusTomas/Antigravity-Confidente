@@ -28,6 +28,14 @@ export default function ChatVoiceScreen() {
     }
   }, []);
 
+  const speakWithHumanVoice = (text: string) => {
+    Speech.speak(text, {
+      language: 'pt-BR',
+      pitch: 1.1,
+      rate: 0.9,
+    });
+  };
+
   const handleSend = async () => {
     if (!text.trim() || typing) return;
     
@@ -55,7 +63,16 @@ export default function ChatVoiceScreen() {
       addMessage(aiMsg);
       
       if (voiceEnabled) {
-        Speech.speak(response, { language: 'pt-BR', pitch: 1.0, rate: 1.0 });
+        speakWithHumanVoice(response);
+      }
+      
+      // Check if AI should navigate to a screen
+      if (response.includes('diário') || response.includes('registrar') || response.includes('escrever')) {
+        navigation.navigate('NewEntry');
+      } else if (response.includes('respirar') || response.includes('acalmar') || response.includes('relaxar')) {
+        navigation.navigate('Wellness');
+      } else if (response.includes('humor') || response.includes('como você está')) {
+        navigation.navigate('Journal');
       }
     } catch (error) {
       Alert.alert('Erro', 'Não consegui responder. Tente novamente.');
