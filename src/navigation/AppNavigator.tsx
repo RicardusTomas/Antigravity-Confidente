@@ -37,7 +37,7 @@ function TabNavigator() {
         tabBarIcon: ({ focused, color }) => {
           const icons = TAB_ICONS[route.name];
           const iconName = focused ? icons.focused : icons.default;
-          return <Ionicons name={iconName as any} size={route.name === 'Chat' ? 26 : 22} color={color} />;
+          return <Ionicons name={iconName as any} size={22} color={color} />;
         },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textTertiary,
@@ -45,17 +45,11 @@ function TabNavigator() {
           backgroundColor: colors.card,
           borderTopColor: colors.divider,
           borderTopWidth: 1,
-          paddingBottom: 6,
-          paddingTop: 6,
-          height: 62,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 10,
-          elevation: 8,
+          paddingBottom: 8,
+          paddingTop: 8,
+          height: 64,
         },
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
-        unmountOnBlur: false,
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Início' }} />
@@ -74,19 +68,53 @@ export default function AppNavigator() {
     ...(darkMode ? DarkTheme : DefaultTheme),
     colors: {
       ...(darkMode ? DarkTheme.colors : DefaultTheme.colors),
-      background: 'transparent',
+      background: colors.background,
     },
   };
 
   return (
     <GlobalBackground>
       <NavigationContainer theme={MyTheme}>
-        <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
+        <Stack.Navigator 
+          screenOptions={{ 
+            headerShown: false, 
+            animation: 'slide_from_right',
+            gestureEnabled: true,
+          }}
+        >
           <Stack.Screen name="Tabs" component={TabNavigator} />
-          <Stack.Screen name="Wellness" component={WellnessScreen} />
-          <Stack.Screen name="Settings" component={SettingsScreen} />
-          <Stack.Screen name="NewEntry" component={NewEntryScreen} />
-          <Stack.Screen name="ChatVoice" component={ChatVoiceScreen} />
+          <Stack.Screen 
+            name="Wellness" 
+            component={WellnessScreen}
+            options={{ 
+              presentation: 'modal',
+              gestureDirection: 'vertical',
+            }} 
+          />
+          <Stack.Screen 
+            name="Settings" 
+            component={SettingsScreen}
+            options={{ 
+              presentation: 'modal',
+              gestureDirection: 'vertical',
+            }} 
+          />
+          <Stack.Screen 
+            name="NewEntry" 
+            component={NewEntryScreen}
+            options={{ 
+              presentation: 'modal',
+              gestureDirection: 'vertical',
+            }} 
+          />
+          <Stack.Screen 
+            name="ChatVoice" 
+            component={ChatVoiceScreen}
+            options={{ 
+              presentation: 'modal',
+              gestureDirection: 'vertical',
+            }} 
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </GlobalBackground>

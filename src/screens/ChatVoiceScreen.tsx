@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ScrollView } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useStore } from '../store/useStore';
 import { generateOpenAIResponse, getWelcome } from '../utils/openai';
 import { generateId } from '../utils/moodHelpers';
@@ -15,7 +16,7 @@ export default function ChatVoiceScreen() {
   const [typing, setTyping] = useState(false);
   const listRef = useRef<FlatList>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (chatMessages.length === 0) {
       const welcomeMsg: ChatMessage = {
         id: generateId(),
@@ -37,12 +38,13 @@ export default function ChatVoiceScreen() {
       timestamp: new Date().toISOString() 
     };
     addMessage(userMsg);
+    const userText = text.trim();
     setText('');
     setTyping(true);
 
     try {
       const history = chatMessages.map(m => ({ role: m.role, content: m.content }));
-      const { text: response, isAI } = await generateOpenAIResponse(text.trim(), history);
+      const { text: response } = await generateOpenAIResponse(userText, history);
       
       const aiMsg: ChatMessage = { 
         id: generateId(), 
@@ -52,7 +54,7 @@ export default function ChatVoiceScreen() {
       };
       addMessage(aiMsg);
       
-      if (voiceEnabled && isAI) {
+      if (voiceEnabled) {
         Speech.speak(response, { language: 'pt-BR', pitch: 1.0, rate: 1.0 });
       }
     } catch (error) {
@@ -90,7 +92,13 @@ export default function ChatVoiceScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <StatusBar barStyle="light-content" backgroundColor="#7C6F9B" />
+      <LinearGradient 
+        colors={['#7C6F9B', '#9B8BB8']} 
+        start={{ x: 0, y: 0 }} 
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
           <Ionicons name="close" size={24} color="#FFF" />
         </TouchableOpacity>
@@ -112,7 +120,7 @@ export default function ChatVoiceScreen() {
             <Ionicons name="refresh" size={20} color="#FFF" />
           </TouchableOpacity>
         </View>
-      </View>
+      </LinearGradient>
 
       <FlatList
         ref={listRef}
@@ -123,8 +131,11 @@ export default function ChatVoiceScreen() {
         onContentSizeChange={() => listRef.current?.scrollToEnd()}
       />
 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <View style={styles.inputRow}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
+        <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
             placeholder="Digite sua mensagem..."
@@ -133,9 +144,10 @@ export default function ChatVoiceScreen() {
             onChangeText={setText}
             onSubmitEditing={handleSend}
             editable={!typing}
+            multiline
           />
           <TouchableOpacity 
-            style={[styles.sendBtn, typing && styles.sendBtnDisabled]} 
+            style={[styles.sendBtn, (typing || !text.trim()) && styles.sendBtnDisabled]} 
             onPress={handleSend}
             disabled={typing || !text.trim()}
           >
@@ -148,42 +160,89 @@ export default function ChatVoiceScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F6FF' },
-  header: {
-    flexDirection: 'row', alignItems: 'center',
+  container: { 
+    flex: 1, 
     backgroundColor: '#7C6F9B',
-    paddingHorizontal: 8, paddingVertical: 12, gap: 8,
   },
-  closeBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  header: {
+    flexDirection: 'row', 
+    alignItems: 'center',
+    paddingHorizontal: 8, 
+    paddingTop: 48,
+    paddingBottom: 12, 
+    gap: 8,
+  },
+  closeBtn: { 
+    width: 40, 
+    height: 40, 
+    borderRadius: 20, 
+    alignItems: 'center', 
+    justifyContent: 'center' 
+  },
   headerCenter: { flex: 1 },
-  title: { fontSize: 18, fontWeight: '700', color: '#FFF' },
+  title: { fontSize: 20, fontWeight: '700', color: '#FFF' },
   subtitle: { fontSize: 12, color: 'rgba(255,255,255,0.8)' },
   headerActions: { flexDirection: 'row', gap: 4 },
   headerBtn: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 36, 
+    height: 36, 
+    borderRadius: 18,
     backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center', justifyContent: 'center'
+    alignItems: 'center', 
+    justifyContent: 'center'
   },
-  msgList: { padding: 16 },
+  msgList: { 
+    padding: 16,
+    backgroundColor: '#F8F6FF',
+  },
   messageBubble: {
-    maxWidth: '80%', borderRadius: 20, padding: 14, marginBottom: 10,
+    maxWidth: '85%', 
+    borderRadius: 20, 
+    padding: 14, 
+    marginBottom: 10,
   },
-  userMsg: { alignSelf: 'flex-end', backgroundColor: '#7C6F9B' },
-  aiMsg: { alignSelf: 'flex-start', backgroundColor: '#FFF' },
-  messageText: { fontSize: 15, lineHeight: 22 },
+  userMsg: { 
+    alignSelf: 'flex-end', 
+    backgroundColor: '#7C6F9B',
+    borderBottomRightRadius: 4,
+  },
+  aiMsg: { 
+    alignSelf: 'flex-start', 
+    backgroundColor: '#FFF',
+    borderBottomLeftRadius: 4,
+  },
+  messageText: { 
+    fontSize: 15, 
+    lineHeight: 22 
+  },
   userText: { color: '#FFF' },
   aiText: { color: '#333' },
-  inputRow: {
-    flexDirection: 'row', padding: 12, backgroundColor: '#FFF',
-    gap: 10, borderTopWidth: 1, borderTopColor: '#EEE',
+  inputContainer: {
+    flexDirection: 'row', 
+    padding: 12, 
+    backgroundColor: '#FFF',
+    gap: 10, 
+    borderTopWidth: 1, 
+    borderTopColor: '#EEE',
   },
   input: {
-    flex: 1, borderRadius: 20, paddingHorizontal: 18, paddingVertical: 12,
-    fontSize: 15, backgroundColor: '#F5F5F5', color: '#333',
+    flex: 1, 
+    borderRadius: 20, 
+    paddingHorizontal: 18, 
+    paddingVertical: 12,
+    fontSize: 15, 
+    backgroundColor: '#F5F5F5', 
+    color: '#333',
+    maxHeight: 100,
   },
   sendBtn: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#7C6F9B', alignItems: 'center', justifyContent: 'center',
+    width: 44, 
+    height: 44, 
+    borderRadius: 22,
+    backgroundColor: '#7C6F9B', 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
   },
   sendBtnDisabled: { backgroundColor: '#CCC' },
 });
