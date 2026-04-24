@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView, Animated, Dimensions, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView, Animated, Dimensions, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -109,8 +109,7 @@ export default function LoginScreen() {
           showsVerticalScrollIndicator={false}
           bounces={false}
         >
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+          <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
               <View style={styles.logoContainer}>
                 <LinearGradient colors={GRADIENTS.primary as any} style={styles.logoCircle}>
                   <Text style={styles.logoEmoji}>💜</Text>
@@ -230,8 +229,7 @@ export default function LoginScreen() {
                 </View>
               </View>
             </Animated.View>
-          </TouchableWithoutFeedback>
-        </ScrollView>
+          </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
   );
