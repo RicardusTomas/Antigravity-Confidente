@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView, Animated, Dimensions, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, Alert, KeyboardAvoidingView, Platform, ScrollView, Animated, Dimensions, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -98,7 +98,7 @@ export default function LoginScreen() {
       >
         <View style={styles.logoSection}>
           <View style={styles.logoCircle}>
-            <Text style={styles.logoEmoji}>💜</Text>
+            <Image source={require('../../assets/confidente.png')} style={styles.logoImg} />
           </View>
           <Text style={styles.appName}>Confidente</Text>
           <Text style={styles.tagline}>Seu espaço seguro para se expressar</Text>
@@ -217,6 +217,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2, shadowRadius: 16, elevation: 8,
   },
   logoEmoji: { fontSize: 36 },
+  logoImg: { width: 80, height: 80, borderRadius: 40 },
   appName: { fontSize: 32, fontWeight: '800', color: '#FFF', letterSpacing: -0.5 },
   tagline: { fontSize: 14, marginTop: 6, color: 'rgba(255,255,255,0.8)' },
   

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Switch, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Switch, Modal, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -65,7 +65,7 @@ export default function ProfileScreen() {
         {/* Avatar & Name */}
         <LinearGradient colors={GRADIENTS.primary} style={styles.profileCard}>
           <View style={styles.avatarCircle}>
-            <Text style={styles.avatarEmoji}>💜</Text>
+            <Image source={require('../../assets/confidente.png')} style={styles.avatarImg} />
           </View>
           {editing ? (
             <View style={styles.editRow}>
@@ -217,6 +217,7 @@ const styles = StyleSheet.create({
   profileCard: { marginHorizontal: 16, borderRadius: 24, padding: 28, alignItems: 'center', marginTop: 12 },
   avatarCircle: { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
   avatarEmoji: { fontSize: 32 },
+  avatarImg: { width: 72, height: 72, borderRadius: 36 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   name: { fontSize: 18, fontWeight: '600', color: '#FFF' },
   editRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },

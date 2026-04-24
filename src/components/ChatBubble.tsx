@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { useThemeColors } from '../theme/colors';
 
 interface ChatBubbleProps {
@@ -15,7 +15,7 @@ export default function ChatBubble({ message, isUser, timestamp }: ChatBubblePro
     <View style={[styles.row, isUser && styles.rowUser]}>
       {!isUser && (
         <View style={[styles.avatar, { backgroundColor: colors.primaryBg }]}>
-          <Text style={styles.avatarText}>💜</Text>
+          <Image source={require('../../assets/confidente.png')} style={styles.avatarImg} />
         </View>
       )}
       <View style={[
@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', marginRight: 8,
   },
   avatarText: { fontSize: 16 },
+  avatarImg: { width: 34, height: 34, borderRadius: 17 },
   bubble: { maxWidth: '75%', padding: 14, borderRadius: 22 },
   userBubble: {
     borderBottomRightRadius: 6,
