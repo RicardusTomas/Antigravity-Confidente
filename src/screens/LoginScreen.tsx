@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     borderRadius: 14, marginBottom: 8, paddingHorizontal: 14,
   },
   inputIcon: { marginRight: 10 },
-  input: { flex: 1, paddingVertical: 16, fontSize: 16, color: '#333' },
+  input: { flex: 1, paddingVertical: 16, fontSize: 16, color: '#333', outlineWidth: 0 },
   eyeBtn: { padding: 6 },
   errorText: { color: '#E74C3C', fontSize: 12, marginBottom: 8, marginLeft: 4 },
   
