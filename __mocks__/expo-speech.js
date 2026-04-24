@@ -1,0 +1,1 @@
+module.exports = { speak: jest.fn(), stop: jest.fn(), pause: jest.fn(), resume: jest.fn() };

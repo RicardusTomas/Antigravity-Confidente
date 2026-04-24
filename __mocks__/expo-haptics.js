@@ -1,0 +1,1 @@
+module.exports = { impactAsync: jest.fn(), selectionAsync: jest.fn(), notificationAsync: jest.fn() };

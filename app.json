@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Confidente",
+    "slug": "confidente",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#7C6F9B"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.confidente.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#7C6F9B"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.confidente.app",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.INTERNET",
+        "android.permission.VIBRATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "meta": {
+        "description": "Seu companheiro emocional inteligente. Fale ou escreva sem julgamento."
+      }
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}
