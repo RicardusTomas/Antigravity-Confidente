@@ -125,6 +125,8 @@ export default function LoginScreen() {
                 onChangeText={(t) => { setUsername(t); setErrors(e => ({ ...e, username: undefined })); }}
                 autoCapitalize="words"
                 autoCorrect={false}
+                selectionColor="#7C6F9B"
+                underlineColorAndroid="transparent"
               />
             </View>
             {errors.username && (
@@ -140,6 +142,8 @@ export default function LoginScreen() {
                 value={password}
                 onChangeText={(t) => { setPassword(t); setErrors(e => ({ ...e, password: undefined })); }}
                 secureTextEntry={!showPassword}
+                selectionColor="#7C6F9B"
+                underlineColorAndroid="transparent"
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
                 <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#999" />
@@ -159,6 +163,8 @@ export default function LoginScreen() {
                   value={confirmPassword}
                   onChangeText={(t) => { setConfirmPassword(t); setErrors(e => ({ ...e, confirm: undefined })); }}
                   secureTextEntry={!showPassword}
+                  selectionColor="#7C6F9B"
+                  underlineColorAndroid="transparent"
                 />
               </View>
             )}

@@ -100,11 +100,27 @@ export default function HomeScreen({ navigation }: any) {
               activeOpacity={0.9}
             >
               <LinearGradient colors={GRADIENTS.primary} style={styles.profileCircle}>
-                <Text style={styles.profileEmoji}>💜</Text>
+                <Image source={require('../../assets/confidente.png')} style={styles.profileImg} />
               </LinearGradient>
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Botão grande para falar com IA */}
+        <TouchableOpacity 
+          style={[styles.aiChatButton, { backgroundColor: darkMode ? '#2A2040' : '#F5F0FF' }]}
+          onPress={() => navigation.navigate('ChatVoice')}
+          activeOpacity={0.85}
+        >
+          <View style={[styles.aiAvatarWrap, { backgroundColor: '#7C6F9B' }]}>
+            <Image source={require('../../assets/confidente.png')} style={styles.aiAvatarImg} />
+          </View>
+          <View style={styles.aiChatContent}>
+            <Text style={[styles.aiChatTitle, { color: colors.text }]}>Conversar com Confidente</Text>
+            <Text style={[styles.aiChatSubtitle, { color: colors.textSecondary }]}>Fale ou escreva o que está sentindo</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={22} color={colors.textSecondary} />
+        </TouchableOpacity>
 
         {/* Card de Afirmação com gradiente e borda arredondada premium */}
         <LinearGradient 
@@ -298,6 +314,25 @@ const styles = StyleSheet.create({
   profileButton: { marginTop: 0, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 5 },
   profileCircle: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#FFF' },
   profileEmoji: { fontSize: 20 },
+  profileImg: { width: 42, height: 42, borderRadius: 21 },
+  
+  aiChatButton: { 
+    marginHorizontal: 16, 
+    marginTop: 12,
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    padding: 16, 
+    borderRadius: 20,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  aiAvatarWrap: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', marginRight: 14 },
+  aiAvatarImg: { width: 52, height: 52, borderRadius: 26 },
+  aiChatContent: { flex: 1 },
+  aiChatTitle: { fontSize: 17, fontWeight: '700', marginBottom: 3 },
+  aiChatSubtitle: { fontSize: 13 },
   
   affCard: { 
     marginHorizontal: 20, 
