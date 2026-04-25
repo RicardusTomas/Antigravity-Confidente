@@ -245,6 +245,7 @@ const styles = StyleSheet.create({
   inputWrapper: {},
   inputContainer: {
     flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#F5F5F5',
     borderRadius: 14, marginBottom: 8, paddingHorizontal: 14,
   },
   inputContainerFocused: {
