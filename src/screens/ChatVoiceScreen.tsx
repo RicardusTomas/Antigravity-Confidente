@@ -27,19 +27,40 @@ export default function ChatVoiceScreen() {
       };
       addMessage(welcomeMsg);
     }
+    
+    // Carregar vozes para português
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      speechSynthesis.getVoices();
+    }
   }, []);
 
   const speakWithHumanVoice = (text: string) => {
     Speech.stop();
     
-    // Try expo-speech first
-    Speech.speak(text, {
-      language: 'pt-BR',
-      pitch: 1.2,
-      rate: 1.0,
-      onDone: () => {},
-      onError: (e) => console.log('Speech error:', e)
-    });
+    // Usar Web Speech API para melhor qualidade em português
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-BR';
+      utterance.rate = 1.0;
+      utterance.pitch = 1.1;
+      utterance.volume = 1;
+      
+      // Tentar encontrar uma voz em português
+      const voices = speechSynthesis.getVoices();
+      const ptVoice = voices.find(v => v.lang.includes('pt')) || voices[0];
+      if (ptVoice) {
+        utterance.voice = ptVoice;
+      }
+      
+      speechSynthesis.speak(utterance);
+    } else {
+      // Fallback para expo-speech
+      Speech.speak(text, {
+        language: 'pt-BR',
+        pitch: 1.0,
+        rate: 1.0,
+      });
+    }
   };
 
   const startListening = () => {
