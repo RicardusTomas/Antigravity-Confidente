@@ -31,10 +31,14 @@ export default function ChatVoiceScreen() {
 
   const speakWithHumanVoice = (text: string) => {
     Speech.stop();
+    
+    // Try expo-speech first
     Speech.speak(text, {
       language: 'pt-BR',
-      pitch: 1.15,
-      rate: 0.95,
+      pitch: 1.2,
+      rate: 1.0,
+      onDone: () => {},
+      onError: (e) => console.log('Speech error:', e)
     });
   };
 
@@ -100,8 +104,13 @@ export default function ChatVoiceScreen() {
       };
       addMessage(aiMsg);
       
-      if (voiceEnabled) {
-        speakWithHumanVoice(response);
+      // Tentar falar sempre que houver resposta
+      try {
+        if (voiceEnabled) {
+          speakWithHumanVoice(response);
+        }
+      } catch (e) {
+        console.log('Voice error:', e);
       }
       
       const lowerResponse = response.toLowerCase();
