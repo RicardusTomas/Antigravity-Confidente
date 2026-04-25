@@ -122,27 +122,6 @@ export default function HomeScreen({ navigation }: any) {
           <Ionicons name="chevron-forward" size={22} color={colors.textSecondary} />
         </TouchableOpacity>
 
-        {/* Card de Afirmação com gradiente e borda arredondada premium */}
-        <LinearGradient 
-          colors={darkMode ? ['#3D3550', '#524A70'] : GRADIENTS.primary} 
-          start={{ x: 0, y: 0 }} 
-          end={{ x: 1, y: 1 }} 
-          style={[styles.affCard, { shadowColor: colors.primary }]}
-        >
-          <View style={styles.affHeader}>
-            <View style={styles.affIconBox}>
-              <Text style={styles.affIcon}>✨</Text>
-            </View>
-            <Text style={styles.affLabel}>AFIRMAÇÃO DO DIA</Text>
-          </View>
-          <Text style={styles.affText}>"{affirmation}"</Text>
-          <View style={styles.affDecoration}>
-            <View style={styles.affDot} />
-            <View style={[styles.affDot, styles.affDotSmall]} />
-            <View style={[styles.affDot, styles.affDotTiny]} />
-          </View>
-        </LinearGradient>
-
         {/* Seção de Ações Principais */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>O que você precisa agora?</Text>
         <View style={styles.actionsGrid}>

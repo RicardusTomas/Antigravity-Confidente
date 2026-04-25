@@ -196,9 +196,15 @@ export default function ChatVoiceScreen() {
         keyboardVerticalOffset={0}
       >
         <View style={styles.inputContainer}>
+          <TouchableOpacity 
+            style={[styles.micBtn, isListening && styles.micBtnActive]} 
+            onPress={startListening}
+          >
+            <Ionicons name={isListening ? "mic" : "mic-outline"} size={24} color={isListening ? "#FFF" : "#7C6F9B"} />
+          </TouchableOpacity>
           <TextInput
             style={styles.input}
-            placeholder="Digite sua mensagem..."
+            placeholder="Digite ou fale sua mensagem..."
             placeholderTextColor="#999"
             value={text}
             onChangeText={setText}
@@ -305,4 +311,16 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   sendBtnDisabled: { backgroundColor: '#CCC' },
+  micBtn: {
+    width: 44, 
+    height: 44, 
+    borderRadius: 22,
+    backgroundColor: '#F5F5F5', 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
+  },
+  micBtnActive: {
+    backgroundColor: '#7C6F9B',
+  },
 });
