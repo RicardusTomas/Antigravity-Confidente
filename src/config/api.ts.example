@@ -1,0 +1,2 @@
+// COPIE E COLE SUA API KEY AQUI (depois do =)
+export const OPENAI_API_KEY = 'cole-sua-api-key-aqui';

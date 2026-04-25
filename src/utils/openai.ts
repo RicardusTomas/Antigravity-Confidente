@@ -1,17 +1,13 @@
-import Constants from 'expo-constants';
-
-const API_KEY = (Constants.expoConfig as any)?.extra?.EXPO_PUBLIC_OPENAI_API_KEY;
-
-if (!API_KEY) {
-  console.warn('OpenAI API key não encontrada nas variáveis de ambiente');
-}
+// API Key - Configure no painel do Vercel como variável de ambiente
+// Nome: EXPO_PUBLIC_OPENAI_API_KEY
+const API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY || '';
 
 export async function generateOpenAIResponse(
   userMessage: string,
   conversationHistory: { role: 'user' | 'assistant'; content: string }[] = []
 ): Promise<{ text: string; isAI: boolean }> {
   if (!API_KEY || API_KEY.length < 10) {
-    throw new Error('API key não configurada');
+    return { text: 'Desculpe, a API key não está configurada.', isAI: true };
   }
 
   const messages = [
@@ -47,7 +43,7 @@ Sempre responda de forma que pareça uma conversa natural entre amigas.`
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
@@ -81,7 +77,7 @@ export async function generateSpeech(text: string): Promise<string> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
         model: 'tts-1',
