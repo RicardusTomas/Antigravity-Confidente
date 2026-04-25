@@ -1,6 +1,10 @@
 import Constants from 'expo-constants';
 
-const API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+const API_KEY = (Constants.expoConfig as any)?.extra?.EXPO_PUBLIC_OPENAI_API_KEY;
+
+if (!API_KEY) {
+  console.warn('OpenAI API key não encontrada nas variáveis de ambiente');
+}
 
 export async function generateOpenAIResponse(
   userMessage: string,
